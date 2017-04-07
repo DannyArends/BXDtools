@@ -1,0 +1,13 @@
+Package: BXDtools
+Version: 0.0-1
+Date: 2017-15-02
+Title: BXDtools code
+Description: BXDtools code.
+Author: Danny Arends
+Maintainer: Danny Arends <danny.arends@gmail.com>
+Depends:
+    R (>= 3.1.0)
+Imports:
+    GNapi
+License: GPL-3
+LazyData: true
