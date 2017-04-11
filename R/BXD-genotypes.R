@@ -11,7 +11,7 @@
 # Download the full BXD.geno file from genenetwork.org
 download.BXD.genotypes <- function() {
   bxd.geno <- read.table("http://www.genenetwork.org/genotypes/BXD.geno", sep = "\t",
-                         skip = 20, header = TRUE, row.names = 2, colClasses = "character", stringsAsFactor = FALSE)
+                         skip = 20, header = TRUE, row.names = 2, colClasses = "character", stringsAsFactors = FALSE)
   return(bxd.geno)
 }
 
