@@ -20,6 +20,3 @@ export(get.significant)
 export(plot.phewas)
 export(plot.map)
 export(plot.qtl)
-
-export(bxd.genotypes)
-export(bxd.phenotypes)

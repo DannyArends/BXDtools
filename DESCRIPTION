@@ -8,7 +8,7 @@ Maintainer: Danny Arends <danny.arends@gmail.com>
 Depends:
     R (>= 3.1.0)
 Imports:
-    GNapi
+    GNapi, qtl
 Remotes: 
     kbroman/GNapi
 License: GPL-3

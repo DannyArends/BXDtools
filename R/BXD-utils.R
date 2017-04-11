@@ -14,6 +14,9 @@ test.BXD <- function(x) {
   #bxd.genotypes <- only.BXD.genotypes(bxd.geno)
   #bxd.genotypes <- add.PandF1(bxd.genotypes)
 
+  data('bxd.genotypes', package='BXDtools', envir=environment())
+  bxd.genotypes <- get("bxd.genotypes", envir=environment()) 
+  
   bxd.maf.genotypes <- recode.BXD.to.MAF(bxd.genotypes)
   bxd.numeric <- recode.BXD.genotypes(bxd.genotypes)
 
@@ -21,6 +24,10 @@ test.BXD <- function(x) {
   bxd.numeric[1:5, 1:10]
   bxd.maf.genotypes[1:5, 1:10]
 
+  data('bxd.phenotypes', package='BXDtools', envir=environment())
+  bxd.phenotypes <- get("bxd.phenotypes", envir=environment()) 
+
+  
   #bxd.pheno <- download.BXD.phenotypes()
   #bxd.phenotypes <- as.phenotype.matrix(bxd.genotypes, bxd.pheno)
   bxd.phenosomes <- only.phenosomes(bxd.phenotypes)
