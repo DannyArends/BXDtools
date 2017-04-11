@@ -1,4 +1,12 @@
-
+#
+# BXD-phewas.R
+#
+# copyright (c) 2017-2020 - Danny Arends, Pjotr Prins, Rob Williams, Gudrun A. Brockmann
+# last modified Apr, 2017
+# first written Jan, 2017
+# 
+# Routines to perform pheWAS on the BXD dataset
+#
 
 do.BXD.phewas <- function(bxd.genotypes, bxd.phenosomes, marker = "rs31443144") {
   pvalues <- apply(bxd.phenosomes, 1, function(pheno, geno) {

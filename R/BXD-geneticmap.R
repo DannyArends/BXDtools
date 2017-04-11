@@ -1,3 +1,12 @@
+#
+# BXD-geneticmap.R
+#
+# copyright (c) 2017-2020 - Danny Arends, Pjotr Prins, Rob Williams, Gudrun A. Brockmann
+# last modified Apr, 2017
+# first written Jan, 2017
+# 
+# Routines to calculate allele frequencies
+#
 
 # Calculate the centiMorgan position using Carter-Falconer map locations from the BXD genotype data
 calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, start.at.zero = FALSE, verbose = FALSE){
@@ -86,6 +95,12 @@ plot.qtl <- function(bxd.genotypes, lodscores, highlight.markers = c(), gap = 25
   chromosomes <- unique(geneticMap[,"Chr"])
   total.chr.length <- -gap
   chr.start.pos <- c()
+  
+  # Fix when lodscores do not have names()  
+  if(is.null(names(lodscores)) && length(lodscores) == nrow(geneticMap)) {
+    names(lodscores) <- rownames(geneticMap)
+  }
+  
   for(chr.n in 1:length(chromosomes)){
     total.chr.length <- total.chr.length + gap
     chr.start.pos <- c(chr.start.pos, total.chr.length)
@@ -93,7 +108,7 @@ plot.qtl <- function(bxd.genotypes, lodscores, highlight.markers = c(), gap = 25
     chr.length <- max(as.numeric(chr.map[, "Mb"]))
     total.chr.length <- total.chr.length + chr.length
   }
-  plot(x=c(0, total.chr.length), y = c(0, max(lodscores,na.rm = TRUE)), t = 'n', xlab="Cumulative position (Mb)", ylab="-log10(pvalue)", main = main)
+  plot(x=c(0, total.chr.length), y = c(min(lodscores,na.rm = TRUE), max(lodscores,na.rm = TRUE)), t = 'n', xlab="Cumulative position (Mb)", ylab="-log10(pvalue)", main = main)
   for(chr.n in 1:length(chromosomes)){
     chr.map <- geneticMap[geneticMap[,"Chr"] == chromosomes[chr.n], ]
     points(x=as.numeric(chr.map[, "Mb"]) + chr.start.pos[chr.n], y = rep(0, nrow(chr.map)), pch = "|", cex = 0.3)

@@ -1,3 +1,12 @@
+#
+# BXD-utils.R
+#
+# copyright (c) 2017-2020 - Danny Arends, Pjotr Prins, Rob Williams, Gudrun A. Brockmann
+# last modified Apr, 2017
+# first written Jan, 2017
+# 
+# Additional functions for the BXDtools package
+#
 
 test.BXD <- function(x) {
   require("BXDtools")

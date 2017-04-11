@@ -1,3 +1,12 @@
+#
+# BXD-phenotypes.R
+#
+# copyright (c) 2017-2020 - Danny Arends, Pjotr Prins, Rob Williams, Gudrun A. Brockmann
+# last modified Apr, 2017
+# first written Jan, 2017
+# 
+# Routines to download and process BXD phenotype data using GNapi
+#
 
 # Download a single BXD phenotype
 download.single.BXD.phenotype <- function(datasetid, verbose = FALSE){

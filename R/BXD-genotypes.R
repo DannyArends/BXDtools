@@ -1,3 +1,13 @@
+#
+# BXD-genotypes.R
+#
+# copyright (c) 2017-2020 - Danny Arends, Pjotr Prins, Rob Williams, Gudrun A. Brockmann
+# last modified Apr, 2017
+# first written Jan, 2017
+# 
+# Routines to download and process BXD genotype data using GNapi
+#
+
 # Download the full BXD.geno file from genenetwork.org
 download.BXD.genotypes <- function() {
   bxd.geno <- read.table("http://www.genenetwork.org/genotypes/BXD.geno", sep = "\t",
