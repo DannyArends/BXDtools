@@ -14,8 +14,8 @@ calc.alleleFrequencies <- function(bxd.genotypes) {
     return(c((tbl["B"] * 2 + tbl["H"]) / (2* sum(tbl)), (tbl["D"] * 2 + tbl["H"]) / (2* sum(tbl))))
   })
   allelefreq <- t(allelefreq)
-  allelefreq[,1] <- round(as.numeric(allelefreq[,1]),d = 3)
-  allelefreq[,2] <- round(as.numeric(allelefreq[,2]),d = 3)
+  allelefreq[,1] <- round(as.numeric(allelefreq[,1]), digits = 3)
+  allelefreq[,2] <- round(as.numeric(allelefreq[,2]), digits = 3)
   colnames(allelefreq) <- c("B", "D")
   return(allelefreq)
 }
@@ -28,7 +28,7 @@ calc.MAF <- function(bxd.genotypes) {
     if(tbl["D"] == tbl["B"]) return( c("E", 0.5) )
   })
   allelefreq <- t(allelefreq)
-  allelefreq[,2] <- round(as.numeric(allelefreq[,2]),d = 3)
+  allelefreq[,2] <- round(as.numeric(allelefreq[,2]), digits = 3)
   colnames(allelefreq) <- c("Allele", "MAF")
   return(allelefreq)
 }
