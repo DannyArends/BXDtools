@@ -1,3 +1,7 @@
+importFrom("grDevices", "colorRampPalette")
+importFrom("graphics", "abline", "axis", "legend", "plot", "points", "segments")
+importFrom("stats", "anova", "lm", "p.adjust")
+importFrom("utils", "read.table")
 
 export(download.BXD.genotypes)
 export(calculate.cM.positions)
