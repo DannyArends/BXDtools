@@ -45,7 +45,7 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
     }
   }
   geneticMap <- cbind(geneticMap, cMraw = NA)                                             # Number of recombinations towards start of chromosome
-  geneticMap[,"cMraw"] <- round(100 * (geneticMap[,"nRecS"] / ncol(geneticMap)),2)        # Remember the RAW cM positions
+  geneticMap[,"cMraw"] <- round(100 * (geneticMap[,"nRecS"] / ncol(geneticMap)), digits = 2)        # Remember the RAW cM positions
 
   R <- (geneticMap[,"nRecP"] / ncol(bxd.genotypes))                                       # Deflate the recombination fractions (KW Broman 11 Aug 2016) 
   r = R/(4 - 6 * R)
@@ -62,7 +62,7 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
     l <- l + s
     for(x in 1:length(onChr)) {
       l <- l + geneticMap[onChr[x],"imfcf"]
-      geneticMap[onChr[x], "imfcfsum"] <- round(l, d = 2)
+      geneticMap[onChr[x], "imfcfsum"] <- round(l, digits = 2)
     }
   }
   return(geneticMap)
