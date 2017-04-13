@@ -8,11 +8,13 @@
 # Routines to calculate allele frequencies
 #
 
+calc.alleleFrequency <- function(bxd.marker) {
+  tbl <- table(bxd.marker)
+  return(c((tbl["B"] * 2 + tbl["H"]) / (2* sum(tbl)), (tbl["D"] * 2 + tbl["H"]) / (2* sum(tbl))))
+}
+
 calc.alleleFrequencies <- function(bxd.genotypes) {
-  allelefreq <- apply(bxd.genotypes, 1, function(x){
-    tbl <- table(x)
-    return(c((tbl["B"] * 2 + tbl["H"]) / (2* sum(tbl)), (tbl["D"] * 2 + tbl["H"]) / (2* sum(tbl))))
-  })
+  allelefreq <- apply(bxd.genotypes, 1, calc.alleleFrequency)
   allelefreq <- t(allelefreq)
   allelefreq[,1] <- round(as.numeric(allelefreq[,1]), digits = 3)
   allelefreq[,2] <- round(as.numeric(allelefreq[,2]), digits = 3)
