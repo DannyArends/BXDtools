@@ -17,6 +17,17 @@ test.BXD <- function(x) {
   data('bxd.genotypes', package='BXDtools', envir=environment())
   bxd.genotypes <- get("bxd.genotypes", envir=environment()) 
   
+  calc.alleleFrequency(bxd.genotypes[1,])
+
+  pM <- NULL
+  for(x in rownames(attr(bxd.genotypes,"map"))[1:10]){
+    pvals <- c()
+    for(y in rownames(attr(bxd.genotypes,"map"))[1:1000]){
+      pvals <- c(pvals, calc.LD(bxd.genotypes, mname1 = x, mname2 = y)[["P-value"]])
+    }
+    pM <- rbind(pM, pvals)
+  }
+  
   bxd.maf.genotypes <- recode.BXD.to.MAF(bxd.genotypes)
   bxd.numeric <- recode.BXD.genotypes(bxd.genotypes)
 
@@ -36,4 +47,5 @@ test.BXD <- function(x) {
 
   map <- calculate.cM.positions(bxd.genotypes)
   map[1:10,]
+
 }
