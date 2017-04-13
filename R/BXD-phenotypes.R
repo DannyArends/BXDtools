@@ -10,10 +10,10 @@
 
 # Download a single BXD phenotype
 download.single.BXD.phenotype <- function(datasetid, verbose = FALSE){
-  info <- info_dataset(datasetid)
+  info <- GNapi::info_dataset(datasetid)
   if("dataset" %in% names(info) && info$dataset == "phenotype"){
     if(verbose) cat(paste0("Retrieved data for '", datasetid, "'\n"))
-    return(list(info, get_pheno(datasetid)))
+    return(list(info, GNapi::get_pheno(datasetid)))
   }else{
     if(verbose) cat(datasetid, "not a phenotype\n")
   }
@@ -22,8 +22,7 @@ download.single.BXD.phenotype <- function(datasetid, verbose = FALSE){
 
 # Download all BXD phenotypes and descriptions in a list (of lists)
 download.BXD.phenotypes <- function(verbose = FALSE){
-  require("GNapi")
-  datasets <- list_datasets("BXD")
+  datasets <- GNapi::list_datasets("BXD")
   results <- vector("list", nrow(datasets))
   for(n in 1:nrow(datasets)){
     results[[n]] <- tryCatch(
