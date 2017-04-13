@@ -3,6 +3,7 @@ importFrom("graphics", "abline", "axis", "legend", "plot", "points", "segments")
 importFrom("stats", "anova", "lm", "p.adjust")
 importFrom("utils", "read.table")
 importFrom("GNapi", "get_pheno", "info_dataset", "list_datasets")
+importFrom("utils", "data")
 
 export(download.BXD.genotypes)
 export(calculate.cM.positions)
@@ -20,3 +21,10 @@ export(get.significant)
 export(plot.phewas)
 export(plot.map)
 export(plot.qtl)
+
+export(calc.alleleFrequency)
+export(calc.alleleFrequencies)
+export(calc.MAF)
+
+export(calc.likelihood)
+export(calc.LD)
