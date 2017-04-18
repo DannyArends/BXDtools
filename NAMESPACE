@@ -13,6 +13,7 @@ export(recode.BXD.to.MAF)
 export(recode.BXD.genotypes)
 export(download.BXD.phenotypes)
 export(as.phenotype.matrix)
+export(phenotype.add.class)
 export(only.phenosomes)
 export(do.BXD.phewas)
 export(get.map)
@@ -28,3 +29,5 @@ export(calc.MAF)
 
 export(calc.likelihood)
 export(calc.LD)
+
+export(calc.correlations)
