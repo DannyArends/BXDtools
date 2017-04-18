@@ -70,15 +70,37 @@ as.phenotype.matrix <- function(bxd.genotypes, bxd.pheno){
 }
 
 # Add a phenotype class (extracted from the description column) to each phenotype
-phenotype.add.class <- function(bxd.phenotypes) {
+phenotype.add.class <- function(bxd.phenotypes, splitCNS = TRUE) {
   phenotype.descriptions <- attr(bxd.phenotypes, "annotation")
   
   splitted <- strsplit(phenotype.descriptions[,"description"], "\\,|\\:|\\;")
-  classes <- unlist(lapply(splitted,"[", 1))
-  classes <- gsub(" systems", "", classes)
-  classes <- gsub(" system", "", classes)
-  classes <- gsub(" function", "", classes)
+  classes <- tolower(unlist(lapply(splitted,"[", 1)))
+  classes <- gsub(" systems", "", classes)                                # Make classes more consistent
+  classes <- gsub(" system", "", classes)                                 # Make classes more consistent
+  classes <- gsub(" systen", "", classes)                                 # Fix typos
+  classes <- gsub(" sytstem", "", classes)                                # Fix typos
+  classes <- gsub("enodocrine", "endocrine", classes)                     # Fix typos
+  classes <- gsub("endocrine", "endocrinology", classes)                  # Merge endocrine into endocrinology
+  classes <- gsub("reproductive", "reproduction", classes)                # Merge Reproductive into Reproduction
+  classes <- gsub(" biology", "", classes)                                # Cancer biology -> Cancer
+  classes <- gsub(" function", "", classes)                               # Make classes more consistent
+  classes <- gsub("muscloskeletal", "musculoskeletal", classes)           # Merge Muscloskeletal into Musculoskeletal
+  classes <- gsub(". metabolism", "", classes, fixed = TRUE)              # Fix a weird name
+  classes <- gsub("central nervous", "CNS", classes)                      # Rename: Central nervous to CNS
+  classes <- gsub("infection disease", "infectious disease", classes)     # Merge infection into infectious
+  classes <- gsub(" chemistry", "", classes)                              # Make classes more consistent (blood chemistry -> blood)
+  classes <- gsub("blood", "blood chemistry", classes)                    # Change blood back to blood chemistry
+  classes <- gsub("immune", "immune system", classes)                     # Change immune back to immune system
+  classes <- gsub("lung", "respiratory", classes)                         # Merge lung (2) into respiratory
 
+  # Special handling of the CNS class since it is so big
+  if(splitCNS) {
+    isCNS <- which(classes == "CNS")
+    classes[isCNS] <- paste0(classes[isCNS], ",", tolower(unlist(lapply(splitted[isCNS],"[", 2))))
+  }
+
+  classes <- tools::toTitleCase(classes)
+  
   if(!("class" %in% colnames(phenotype.descriptions))){
     phenotype.descriptions <- cbind(phenotype.descriptions, "class" = classes)
   }else{
@@ -89,8 +111,8 @@ phenotype.add.class <- function(bxd.phenotypes) {
 }
 
 # Get the phenotypes from phenosomes with more that a minimum number of phenotypes
-only.phenosomes <- function(bxd.phenotypes, minimum = 10, verbose = FALSE) {
-  bxd.phenotypes <- phenotype.add.class(bxd.phenotypes)
+only.phenosomes <- function(bxd.phenotypes, minimum = 10, splitCNS = TRUE, verbose = FALSE) {
+  bxd.phenotypes <- phenotype.add.class(bxd.phenotypes, splitCNS = splitCNS)
   phenotype.descriptions <- attr(bxd.phenotypes, "annotation")
   classes <- phenotype.descriptions[, "class"]
   phenosomes <- names(which(table(classes) > minimum))

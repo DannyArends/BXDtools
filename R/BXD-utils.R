@@ -41,6 +41,7 @@ test.BXD <- function(x) {
   
   #bxd.pheno <- download.BXD.phenotypes()
   #bxd.phenotypes <- as.phenotype.matrix(bxd.genotypes, bxd.pheno)
+  require("BXDtools")
   bxd.phenosomes <- only.phenosomes(bxd.phenotypes)
   pvalues <- do.BXD.phewas(bxd.genotypes, bxd.phenosomes)
   plot.phewas(pvalues, bxd.phenosomes, TRUE)
