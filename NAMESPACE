@@ -4,6 +4,7 @@ importFrom("stats", "anova", "lm", "p.adjust")
 importFrom("utils", "read.table")
 importFrom("GNapi", "get_pheno", "info_dataset", "list_datasets")
 importFrom("utils", "data")
+importFrom("parallel", "parApply", "makeCluster", "stopCluster")
 
 export(download.BXD.genotypes)
 export(calculate.cM.positions)
@@ -29,5 +30,8 @@ export(calc.MAF)
 
 export(calc.likelihood)
 export(calc.LD)
+export(calc.LD.marker)
 
 export(calc.correlations)
+
+export(calc.qtl)
