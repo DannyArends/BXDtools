@@ -84,17 +84,19 @@ plot.map <- function(bxd.genotypes, add.markers = TRUE, highlight.markers = c(),
       colz <- rep("black", nrow(chr.map))
       colz[which(rownames(chr.map) %in% highlight.markers)] <- "green"
       points(x = rep(chr.n, nrow(chr.map)), y = as.numeric(chr.map[,"Mb"]), pch = 95, col=colz)
-      idx2 <- which(colz == "green")
-      points(x = rep(chr.n, length(idx2)), y = as.numeric(chr.map[idx2,"Mb"]), pch = 95, col="green")
     }
   }
 }
 
-plot.qtl <- function(bxd.genotypes, lodscores, highlight.markers = c(), gap = 25, main = "") {
+plot.qtl <- function(bxd.genotypes, lodscores, chr = NULL, highlight.markers = c(), gap = 25, main = "", type = 'l', ...) {
   geneticMap <- attr(bxd.genotypes, "map")
   chromosomes <- unique(geneticMap[,"Chr"])
+  if(!is.null(chr)){
+    chromosomes <- chromosomes[which(chromosomes %in% chr)]
+  }
   total.chr.length <- -gap
   chr.start.pos <- c()
+  chr.lengths <- c()
   
   # Fix when lodscores do not have names()  
   if(is.null(names(lodscores)) && length(lodscores) == nrow(geneticMap)) {
@@ -106,17 +108,18 @@ plot.qtl <- function(bxd.genotypes, lodscores, highlight.markers = c(), gap = 25
     chr.start.pos <- c(chr.start.pos, total.chr.length)
     chr.map <- geneticMap[geneticMap[,"Chr"] == chromosomes[chr.n], ]
     chr.length <- max(as.numeric(chr.map[, "Mb"]))
+    chr.lengths <- c(chr.lengths, chr.length)
     total.chr.length <- total.chr.length + chr.length
   }
-  plot(x=c(0, total.chr.length), y = c(min(lodscores,na.rm = TRUE), max(lodscores,na.rm = TRUE)), t = 'n', xlab="Cumulative position (Mb)", ylab="-log10(pvalue)", main = main)
+  plot(x=c(0, total.chr.length), y = c(min(lodscores,na.rm = TRUE), max(lodscores,na.rm = TRUE)), t = 'n', xlab="Position", ylab="-log10(pvalue)", main = main, xaxt='n')
   for(chr.n in 1:length(chromosomes)){
     chr.map <- geneticMap[geneticMap[,"Chr"] == chromosomes[chr.n], ]
     points(x=as.numeric(chr.map[, "Mb"]) + chr.start.pos[chr.n], y = rep(0, nrow(chr.map)), pch = "|", cex = 0.3)
     colz <- rep("black", nrow(chr.map))
     colz[which(rownames(chr.map) %in% highlight.markers)] <- "green"
-    points(x=as.numeric(chr.map[, "Mb"]) + chr.start.pos[chr.n], y = lodscores[rownames(chr.map)], t = 'l')
-    points(x=as.numeric(chr.map[, "Mb"]) + chr.start.pos[chr.n], y = lodscores[rownames(chr.map)], col=colz, t = 'p',pch = 18)
+    points(x = as.numeric(chr.map[, "Mb"]) + chr.start.pos[chr.n], y = lodscores[rownames(chr.map)], type = type, ...)
   }
+  axis(1, at = (chr.lengths / 2.0) + chr.start.pos, chromosomes)
   abline(h = -log10(0.05 / length(lodscores)), lty=2, col="orange")
   abline(h = -log10(0.01 / length(lodscores)), lty=2, col="green")
 }
