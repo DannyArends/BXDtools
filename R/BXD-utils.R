@@ -48,5 +48,9 @@ test.BXD <- function(x) {
 
   map <- calculate.cM.positions(bxd.genotypes)
   map[1:10,]
-
+  
+  
+  require(BXDtools)
+  res <- calc.qtl(bxd.genotypes, bxd.phenotypes)
+  plot.qtl(bxd.genotypes, res)
 }
