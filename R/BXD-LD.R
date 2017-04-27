@@ -75,11 +75,16 @@ calc.LD <- function(bxd.genotypes, mname1 = "rs31443144", mname2 = "rs6269442", 
   return(list("m1.freq" = m1.freq, "m2.freq" = m2.freq , "pPQ" = pPQ, "observed" = observed, "Dmax" = Dmax, "Dmin" = Dmin, "D" = estD, "D'" = estDp, "R^2" = r^2, "sampleSize" =  sum(observed), "X^2"=dchi, "P-value" = dpval))
 }
 
-calc.LD.marker <- function(bxd.genotypes, mname = "rs31443144", distance = 10) {
+calc.LD.marker <- function(bxd.genotypes, mname = "rs31443144", distance = NULL) {
+  map <- attr(bxd.genotypes, "map")
   mChr <- map[mname, "Chr"]
   mPos <- as.numeric(map[mname, "Mb"])
-  nearby <- which(map[,"Chr"] == mChr & as.numeric(map[, "Mb"]) > (mPos - distance) &  as.numeric(map[, "Mb"]) < (mPos + distance))
-  nearby <- rownames(map)[nearby]
+  if(!is.null(distance)){
+    nearby <- which(map[,"Chr"] == mChr & as.numeric(map[, "Mb"]) > (mPos - distance) &  as.numeric(map[, "Mb"]) < (mPos + distance))
+    nearby <- rownames(map)[nearby]
+  }else{
+    nearby <- rownames(map)
+  }
   LDs <- matrix(NA, length(nearby), 6)
   LDs[,1] <- rep(mname, length(nearby))
   LDs[,2] <- nearby
