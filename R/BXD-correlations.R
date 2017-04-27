@@ -22,8 +22,6 @@ calc.correlations <- function(phenotype, bxd.phenotypes, top = 100, matched = 0.
   return(data.frame(cbind( phenotype.descriptions[names(sorted),], "R" = round(correlations[names(sorted)], 3))))
 }
 
-
-
 test.correlation <- function(){
   require("BXDtools")
 
@@ -32,7 +30,7 @@ test.correlation <- function(){
 
   bxd.phenotypes <- phenotype.add.class(bxd.phenotypes)
 
-  perc.missing <- apply(bxd.phenotypes,2,function(x){
+  perc.missing <- apply(bxd.phenotypes, 2, function(x){
     return(sum(is.na(x))/length(x))
   })
 
@@ -45,4 +43,3 @@ test.correlation <- function(){
   
   table(attr(bxd.phenotypes, "annotation")[,"class"])
 }
-
