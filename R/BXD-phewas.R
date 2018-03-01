@@ -32,7 +32,8 @@ do.BXD.phewas.all <- function(bxd.genotypes, bxd.phenosomes) {
 
 plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = FALSE,
                         main = "BxD PheWAS results", pch = 19, cex = 0.6, type = "h",
-                        colorSeed = 1, colorRange = c("darkslateblue", "hotpink1", "forestgreen", "orange", "black", "firebrick1")) {
+                        colorSeed = 1, colorRange = c("darkslateblue", "hotpink1", "forestgreen", 
+                                                      "orange", "black", "firebrick1")) {
   classes <- attr(bxd.phenosomes, "annotation")[,"class"]
   marker <- attr(pvalues, "marker")
   if(do.sort) {
@@ -40,7 +41,7 @@ plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = F
     for(pheclass in unique(classes)){
       indexes <- which(classes == pheclass)
       # Use Radix sorting and put the NA pvalues last
-      sorting <- sort(pvalues[indexes], decreasing = decreasing, index.return = TRUE, method = "radix", na.last=TRUE)
+      sorting <- sort(pvalues[indexes], decreasing = decreasing, index.return = TRUE, method = "quick", na.last=NA)
       ordering <- c(ordering, indexes[sorting$ix])
     }
     pvalues <- pvalues[ordering]
@@ -48,12 +49,17 @@ plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = F
   }else{
     classes.inOrder <- classes
   }
-  if(!is.na(colorSeed)) set.seed(colorSeed)                                   # Set the colorSeed to NA, to cycle colors to groups each plot
-  mcolors <- sample(colorRampPalette(colorRange)(length(unique(classes))))    # Generate colors from colorRange and mix them up for beter visability
+  # Set the colorSeed to NA, to cycle colors to groups each plot
+  if(!is.na(colorSeed)) set.seed(colorSeed)
+  # Generate colors from colorRange and mix them up for beter visability
+  mcolors <- sample(colorRampPalette(colorRange)(length(unique(classes))))
   names(mcolors) <- unique(classes)
 
   main <- paste0("Phewas on ", length(classes), " phenotypes, at ", marker)
-  plot(-log10(pvalues), col = mcolors[classes.inOrder], pch = pch, cex = cex, type = type, xaxt='n', xlab = "Phenosome", ylab="-log10(P)", main=main)
-  legend("topright", paste0(names(mcolors), " (N = ", table(classes)[names(mcolors)], ")"), col = mcolors, pch = pch, cex = cex)
+  plot(-log10(pvalues), col = mcolors[classes.inOrder], pch = pch, 
+                        cex = cex, type = type, xaxt='n', xlab = "Phenosome", ylab="-log10(P)", main=main)
+  legend("topright", paste0(names(mcolors), " (N = ", table(classes)[names(mcolors)], ")"), 
+                     col = mcolors, pch = pch, cex = cex)
   invisible(cbind(classes.inOrder, pvalues))
 }
+
