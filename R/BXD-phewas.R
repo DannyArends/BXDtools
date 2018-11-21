@@ -47,7 +47,7 @@ plot.phewas <- function(scores, bxd.phenosomes, do.sort = FALSE, decreasing = TR
       indexes <- which(classes == pheclass)
       # Use Radix sorting and put the NA scores last
       sorting <- sort(scores[indexes], decreasing = decreasing, index.return = TRUE, method = "quick", na.last=NA)
-      ordering <- c(ordering, indexes[sorting$ix])
+      ordering <- c(ordering, names(sorting$x))
     }
     scores <- scores[ordering]
     classes.inOrder <- classes[ordering]
