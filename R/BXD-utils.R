@@ -35,6 +35,7 @@ test.BXD <- function(x) {
   bxd.numeric[1:5, 1:10]
   bxd.maf.genotypes[1:5, 1:10]
 
+  require("BXDtools")
   data('bxd.phenotypes', package='BXDtools', envir=environment())
   bxd.phenotypes <- get("bxd.phenotypes", envir=environment()) 
 
@@ -43,8 +44,8 @@ test.BXD <- function(x) {
   #bxd.phenotypes <- as.phenotype.matrix(bxd.genotypes, bxd.pheno)
   require("BXDtools")
   bxd.phenosomes <- only.phenosomes(bxd.phenotypes)
-  pvalues <- do.BXD.phewas(bxd.genotypes, bxd.phenosomes)
-  plot.phewas(pvalues, bxd.phenosomes, TRUE)
+  scores <- do.BXD.phewas(bxd.genotypes, bxd.phenosomes, marker = "Affy_5122277", LRS = TRUE)
+  plot.phewas(scores, bxd.phenosomes, TRUE, main = "BXD PheWAS at Affy_5122277 (Chr 8 - 54,959,871)")
 
   map <- calculate.cM.positions(bxd.genotypes)
   map[1:10,]
