@@ -32,7 +32,7 @@ do.BXD.phewas.all <- function(bxd.genotypes, bxd.phenosomes) {
 
 plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = FALSE,
                         main = "BxD PheWAS results", pch = 19, cex = 0.6, type = "h",
-                        colorSeed = 1, colorRange = c("darkslateblue", "hotpink1", "forestgreen", "orange", "black", "firebrick1")) {
+                        colorSeed = 1, colorRange = c("darkslateblue", "hotpink1", "forestgreen", "orange", "black", "firebrick1"), ...) {
   classes <- attr(bxd.phenosomes, "annotation")[,"class"]
   marker <- attr(pvalues, "marker")
   if(do.sort) {
@@ -53,7 +53,7 @@ plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = F
   names(mcolors) <- unique(classes)
 
   main <- paste0("Phewas on ", length(classes), " phenotypes, at ", marker)
-  plot(-log10(pvalues), col = mcolors[classes.inOrder], pch = pch, cex = cex, type = type, xaxt='n', xlab = "Phenosome", ylab="-log10(P)", main=main)
-  legend("topright", paste0(names(mcolors), " (N = ", table(classes)[names(mcolors)], ")"), col = mcolors, pch = pch, cex = cex)
+  plot(-log10(pvalues), col = mcolors[classes.inOrder], pch = pch, cex = cex, type = type, xaxt='n', xlab = "Phenosome", ylab="-log10(P)", main=main, ...)
+  legend("topright", paste0(names(mcolors), " (N = ", table(classes)[names(mcolors)], ")"), col = mcolors, pch = pch, cex = cex, ncol=2)
   invisible(cbind(classes.inOrder, pvalues))
 }
