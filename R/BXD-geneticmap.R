@@ -10,15 +10,17 @@
 
 # Calculate the centiMorgan position using Carter-Falconer map locations from the BXD genotype data
 calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, start.at.zero = FALSE, verbose = FALSE){
-  geneticMap <- attr(bxd.genotypes, "map")
-  geneticMap <- cbind(geneticMap, nRecP = 0, nRecS = 0)
+  bxd.map <- attr(bxd.genotypes, "map")
+  bxd.map <- cbind(bxd.map, nRecP = 0, nRecS = 0)
 
-  chromosomes <- unique(geneticMap[,"Chr"])
+  chromosomes <- unique(bxd.map[,"Chr"])
+  recombinations <- NULL
   for(chr in chromosomes) {
-    onChr <- rownames(geneticMap)[which(geneticMap[,"Chr"] == chr)]
+    onChr <- rownames(bxd.map)[which(bxd.map[,"Chr"] == chr)]
     if(length(onChr) > 1) {                                                               # Make sure there is more then 1 marker on a chromosome
       geno.subset <- bxd.genotypes[onChr, ]                                               # Subset the genotypes on this chromosome
       previousState <- geno.subset[1, ]
+      nrecPerChrInd <- rep(0, ncol(bxd.genotypes))
       nrecSinceStart <- 0
       for(x in rownames(geno.subset)[-1]) {                                               # Start at the second marker on the chromosome
         nrecToPrev <- 0
@@ -29,6 +31,7 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
                 if(count.Heterozygous) nrecToPrev <- nrecToPrev + 0.5                     # Count heterozygous genotypes ?
               } else {
                 nrecToPrev <- nrecToPrev + 1
+                nrecPerChrInd[i] <- nrecPerChrInd[i] + 1
               }
               previousState[i] <- geno.subset[x, i]
             }
@@ -38,34 +41,65 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
           }
         }
         nrecSinceStart = nrecSinceStart + nrecToPrev
-        geneticMap[x, "nRecP"] = nrecToPrev
-        geneticMap[x, "nRecS"] = nrecSinceStart
+        bxd.map[x, "nRecP"] = nrecToPrev
+        bxd.map[x, "nRecS"] = nrecSinceStart
         if(verbose) cat(chr, x, nrecToPrev, nrecSinceStart, "\n")
       }
+      recombinations <- rbind(recombinations, nrecPerChrInd)
     }
   }
-  geneticMap <- cbind(geneticMap, cMraw = NA)                                             # Number of recombinations towards start of chromosome
-  geneticMap[,"cMraw"] <- round(100 * (geneticMap[,"nRecS"] / ncol(geneticMap)), digits = 2)        # Remember the RAW cM positions
+  bxd.map <- cbind(bxd.map, cMraw = NA)                                             # Number of recombinations towards start of chromosome
+  bxd.map[,"cMraw"] <- round(100 * (bxd.map[,"nRecS"] / ncol(bxd.map)), digits = 2)        # Remember the RAW cM positions
 
-  R <- (geneticMap[,"nRecP"] / ncol(bxd.genotypes))                                       # Deflate the recombination fractions (KW Broman 11 Aug 2016) 
+  R <- (bxd.map[,"nRecP"] / ncol(bxd.genotypes))                                       # Deflate the recombination fractions (KW Broman 11 Aug 2016) 
   r = R/(4 - 6 * R)
 
-  geneticMap <- cbind(geneticMap, imfcf = NA)                                             # Carter-Falconer map distances to previous marker
-  geneticMap[,"imfcf"] <- qtl::imf.cf(r)
+  bxd.map <- cbind(bxd.map, imfcf = NA)                                             # Carter-Falconer map distances to previous marker
+  bxd.map[,"imfcf"] <- qtl::imf.cf(r)
 
-  geneticMap <- cbind(geneticMap, imfcfsum = NA)                                          # Carter-Falconer map locations to start of chromosome
+  bxd.map <- cbind(bxd.map, imfcfsum = NA)                                          # Carter-Falconer map locations to start of chromosome
   for(chr in chromosomes) {
-    onChr <- rownames(geneticMap)[which(geneticMap[,"Chr"] == chr)]
+    onChr <- rownames(bxd.map)[which(bxd.map[,"Chr"] == chr)]
     l <- 0
     s <- 0
-    if(!start.at.zero) s <- min(as.numeric(geneticMap[onChr, "cM"]))                      # Add the start of the marker on the old genetic map
+    if(!start.at.zero) s <- min(as.numeric(bxd.map[onChr, "cM"]))                      # Add the start of the marker on the old genetic map
     l <- l + s
     for(x in 1:length(onChr)) {
-      l <- l + geneticMap[onChr[x],"imfcf"]
-      geneticMap[onChr[x], "imfcfsum"] <- round(l, digits = 2)
+      l <- l + bxd.map[onChr[x],"imfcf"]
+      bxd.map[onChr[x], "imfcfsum"] <- round(l, digits = 2)
     }
   }
-  return(geneticMap)
+  colnames(recombinations) <- colnames(bxd.genotypes)
+  rownames(recombinations) <- chromosomes
+  attr(bxd.map, "recombinations") <- recombinations
+  return(bxd.map)
+}
+
+plot.epochs <- function(bxd.map) {
+  recombinations <- attr(bxd.map, "recombinations")
+  recombinations <- recombinations[,grep("BXD", colnames(recombinations))]
+  chromosomes <- rownames(recombinations)
+  op <- par(mar = c(5, 4, 1, 1))
+  cols <- colorRampPalette(RColorBrewer::brewer.pal(6, "Dark2"))(nrow(recombinations))
+
+  cohorts <- c(which(colnames(recombinations) == "BXD42")+0.5,
+               which(colnames(recombinations) == "BXD102")+0.5,
+               which(colnames(recombinations) == "BXD157")+0.5,
+               which(colnames(recombinations) == "BXD186")+0.5, ncol(recombinations)+0.5)
+  pY <- apply(recombinations, 2, sum)
+
+  plot(x = c(0.5, 0.5 + ncol(recombinations)), y = c(0, max(pY, na.rm = TRUE) * 1.2), t = 'n', xlab = "BXD Epoch", ylab = "# Recombinations", 
+       xaxt='n', xaxs="i", yaxs="i", las=2, cex.lab=1.5,cex.axis=1.5)
+
+  for(x in nrow(recombinations):1){
+    rect(rep(1:ncol(recombinations)) - 0.5, pY, rep(1:ncol(recombinations)) + 0.5, pY - recombinations[x,], col=cols[x], border = "white", lwd =0.1)
+    pY <- pY - recombinations[x,]
+  }
+  abline(v = cohorts)
+  legend_order <- matrix(1:20,ncol=2, byrow = FALSE)
+  axis(1, at = midpoints(cohorts), c("Taylor '70 - '90", "Williams '90", "Williams '08", "Williams & Palmer '10", "Williams '14"),cex.axis=1.5)
+  box()
+  legend("topleft", paste0("Chr ", chromosomes)[legend_order], fill=cols[legend_order], cex=1, ncol=2, border = "white")
 }
 
 plot.map <- function(bxd.genotypes, add.markers = TRUE, highlight.markers = c(), main = "") {

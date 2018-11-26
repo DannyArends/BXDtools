@@ -1,10 +1,11 @@
 importFrom("grDevices", "colorRampPalette")
-importFrom("graphics", "abline", "axis", "legend", "plot", "points", "segments")
-importFrom("stats", "anova", "lm", "p.adjust")
+importFrom("graphics", "abline", "axis", "legend", "plot", "points", "segments", "par", "rect", "box")
+importFrom("stats", "anova", "lm", "p.adjust", "optimize", "pchisq", "cor", "rnorm")
 importFrom("utils", "read.table")
 importFrom("GNapi", "get_pheno", "info_dataset", "list_datasets")
 importFrom("utils", "data")
 importFrom("parallel", "parApply", "makeCluster", "stopCluster")
+importFrom("RColorBrewer", "brewer.pal")
 
 export(download.BXD.genotypes)
 export(calculate.cM.positions)
@@ -35,3 +36,5 @@ export(calc.LD.marker)
 export(calc.correlations)
 
 export(calc.qtl)
+
+export(midpoints)

@@ -8,6 +8,15 @@
 # Additional functions for the BXDtools package
 #
 
+midpoints <- function(x, s = 1){
+  p <- NULL
+  for(i in 1:length(x)){
+    p <- c(p, (s + x[i] / 2))
+    s <- (p[i] - s)
+  }
+  return(p)
+}
+
 test.BXD <- function(x) {
   require("BXDtools")
   #bxd.geno <- download.BXD.genotypes()
@@ -16,6 +25,7 @@ test.BXD <- function(x) {
 
   data('bxd.genotypes', package='BXDtools', envir=environment())
   bxd.genotypes <- get("bxd.genotypes", envir=environment()) 
+  bxd.map <- calculate.cM.positions(bxd.genotypes)
   
   calc.alleleFrequency(bxd.genotypes[1,])
 
