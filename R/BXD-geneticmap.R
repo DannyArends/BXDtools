@@ -17,18 +17,18 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
   recombinations <- NULL
   for(chr in chromosomes) {
     onChr <- rownames(bxd.map)[which(bxd.map[,"Chr"] == chr)]
-    if(length(onChr) > 1) {                                                               # Make sure there is more then 1 marker on a chromosome
-      geno.subset <- bxd.genotypes[onChr, ]                                               # Subset the genotypes on this chromosome
+    if(length(onChr) > 1) {  # Make sure there is more then 1 marker on a chromosome
+      geno.subset <- bxd.genotypes[onChr, ]  # Subset the genotypes on this chromosome
       previousState <- geno.subset[1, ]
       nrecPerChrInd <- rep(0, ncol(bxd.genotypes))
       nrecSinceStart <- 0
-      for(x in rownames(geno.subset)[-1]) {                                               # Start at the second marker on the chromosome
+      for(x in rownames(geno.subset)[-1]) {  # Start at the second marker on the chromosome
         nrecToPrev <- 0
         for(i in 1:ncol(geno.subset)) {
-          if(!is.na(geno.subset[x,i]) && !is.na(previousState[i])) {                      # Make sure we don't accidentally compare missing values
+          if(!is.na(geno.subset[x,i]) && !is.na(previousState[i])) {  # Make sure we don't accidentally compare missing values
             if(previousState[i] != geno.subset[x,i]) {
               if(previousState[i] == "H" || geno.subset[x,i] == "H") {
-                if(count.Heterozygous) nrecToPrev <- nrecToPrev + 0.5                     # Count heterozygous genotypes ?
+                if(count.Heterozygous) nrecToPrev <- nrecToPrev + 0.5  # Count heterozygous genotypes ?
               } else {
                 nrecToPrev <- nrecToPrev + 1
                 nrecPerChrInd[i] <- nrecPerChrInd[i] + 1
@@ -36,7 +36,7 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
               previousState[i] <- geno.subset[x, i]
             }
           }
-          if(is.na(previousState[i]) && !is.na(geno.subset[x, i])) {                      # Is the previous state is an NA, but the current genotype isn't update the previousState
+          if(is.na(previousState[i]) && !is.na(geno.subset[x, i])) {  # Is the previous state is an NA, but the current genotype isn't update the previousState
             previousState[i] <- geno.subset[x, i]
           }
         }
@@ -48,21 +48,21 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
       recombinations <- rbind(recombinations, nrecPerChrInd)
     }
   }
-  bxd.map <- cbind(bxd.map, cMraw = NA)                                             # Number of recombinations towards start of chromosome
-  bxd.map[,"cMraw"] <- round(100 * (bxd.map[,"nRecS"] / ncol(bxd.map)), digits = 2)        # Remember the RAW cM positions
+  bxd.map <- cbind(bxd.map, cMraw = NA)  # Number of recombinations towards start of chromosome
+  bxd.map[,"cMraw"] <- round(100 * (bxd.map[,"nRecS"] / ncol(bxd.map)), digits = 2)  # Remember the RAW cM positions
 
-  R <- (bxd.map[,"nRecP"] / ncol(bxd.genotypes))                                       # Deflate the recombination fractions (KW Broman 11 Aug 2016) 
+  R <- (bxd.map[,"nRecP"] / ncol(bxd.genotypes))  # Deflate the recombination fractions (KW Broman 11 Aug 2016) 
   r = R/(4 - 6 * R)
 
-  bxd.map <- cbind(bxd.map, imfcf = NA)                                             # Carter-Falconer map distances to previous marker
+  bxd.map <- cbind(bxd.map, imfcf = NA)  # Carter-Falconer map distances to previous marker
   bxd.map[,"imfcf"] <- qtl::imf.cf(r)
 
-  bxd.map <- cbind(bxd.map, imfcfsum = NA)                                          # Carter-Falconer map locations to start of chromosome
+  bxd.map <- cbind(bxd.map, imfcfsum = NA)  # Carter-Falconer map locations to start of chromosome
   for(chr in chromosomes) {
     onChr <- rownames(bxd.map)[which(bxd.map[,"Chr"] == chr)]
     l <- 0
     s <- 0
-    if(!start.at.zero) s <- min(as.numeric(bxd.map[onChr, "cM"]))                      # Add the start of the marker on the old genetic map
+    if(!start.at.zero) s <- min(as.numeric(bxd.map[onChr, "cM"]))  # Add the start of the marker on the old genetic map
     l <- l + s
     for(x in 1:length(onChr)) {
       l <- l + bxd.map[onChr[x],"imfcf"]

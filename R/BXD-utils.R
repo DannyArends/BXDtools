@@ -26,7 +26,9 @@ test.BXD <- function(x) {
   data('bxd.genotypes', package='BXDtools', envir=environment())
   bxd.genotypes <- get("bxd.genotypes", envir=environment()) 
   bxd.map <- calculate.cM.positions(bxd.genotypes)
-  
+
+  plot.epochs(bxd.map)
+
   calc.alleleFrequency(bxd.genotypes[1,])
 
   pM <- NULL
