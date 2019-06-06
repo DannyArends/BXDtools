@@ -75,9 +75,12 @@ calculate.cM.positions <- function(bxd.genotypes, count.Heterozygous = TRUE, sta
   return(bxd.map)
 }
 
-plot.epochs <- function(bxd.map) {
+plot.epochs <- function(bxd.map, strains = NULL) {
   recombinations <- attr(bxd.map, "recombinations")
   recombinations <- recombinations[,grep("BXD", colnames(recombinations))]
+  if(!is.null(strains)){
+    recombinations <- recombinations[, strains]
+  }
   chromosomes <- rownames(recombinations)
   op <- par(mar = c(5, 4, 1, 1))
   cols <- colorRampPalette(RColorBrewer::brewer.pal(6, "Dark2"))(nrow(recombinations))
@@ -97,7 +100,7 @@ plot.epochs <- function(bxd.map) {
   }
   abline(v = cohorts)
   legend_order <- matrix(1:20,ncol=2, byrow = FALSE)
-  axis(1, at = midpoints(cohorts), c("Taylor '70 - '90", "Williams '90", "Williams '08", "Williams & Palmer '10", "Williams '14"),cex.axis=1.5)
+  axis(1, at = midpoints(cohorts), c("Epoch 1", "Epoch 2", "Epoch 3", "Epoch 4", "Epoch 5"),cex.axis=1.5)
   box()
   legend("topleft", paste0("Chr ", chromosomes)[legend_order], fill=cols[legend_order], cex=1, ncol=2, border = "white")
 }

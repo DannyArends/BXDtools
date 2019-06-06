@@ -24,6 +24,7 @@ export(get.significant)
 export(plot.phewas)
 export(plot.map)
 export(plot.qtl)
+export(plot.epochs)
 
 export(calc.alleleFrequency)
 export(calc.alleleFrequencies)
