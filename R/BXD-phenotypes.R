@@ -10,31 +10,36 @@
 
 # Download a single BXD phenotype
 download.single.BXD.phenotype <- function(datasetid, verbose = FALSE){
-  info <- GNapi::info_dataset(datasetid)
-  if("dataset" %in% names(info) && info$dataset == "phenotype"){
-    if(verbose) cat(paste0("Retrieved data for '", datasetid, "'\n"))
-    return(list(info, GNapi::get_pheno(datasetid)))
-  }else{
-    if(verbose) cat(datasetid, "not a phenotype\n")
-  }
+  #info <- GNapi::info_dataset(datasetid)
+  #if("dataset" %in% names(info) && info$dataset == "phenotype"){
+  #  if(verbose) cat(paste0("Retrieved data for '", datasetid, "'\n"))
+  #  return(list(info, GNapi::get_pheno(datasetid)))
+  #}else{
+  #  if(verbose) cat(datasetid, "not a phenotype\n")
+  #}
+  cat("The GeneNetwork API is currently not allowing the querying of all phenotypes\n")
+  cat("As such this function isn't working as intended\n")
   return(NULL)
 }
 
 # Download all BXD phenotypes and descriptions in a list (of lists)
 download.BXD.phenotypes <- function(verbose = FALSE){
-  datasets <- GNapi::list_datasets("BXD")
-  results <- vector("list", nrow(datasets))
-  for(n in 1:nrow(datasets)){
-    results[[n]] <- tryCatch(
-      download.single.BXD.phenotype(datasets[n, "id"])
-      , error = function(e) {
-        if(verbose){
-          cat(paste0(n, " ", datasets[n, "id"], " - '", datasets[n, "name"], "' has some error\n"))
-        }
-      }
-    )
-  }
-  return(results)
+  #datasets <- GNapi::list_datasets("BXD")
+  #results <- vector("list", nrow(datasets))
+  #for(n in 1:nrow(datasets)){
+  #  results[[n]] <- tryCatch(
+  #    download.single.BXD.phenotype(datasets[n, "id"])
+  #    , error = function(e) {
+  #      if(verbose){
+  #        cat(paste0(n, " ", datasets[n, "id"], " - '", datasets[n, "name"], "' has some error\n"))
+  #      }
+  #    }
+  #  )
+  #}
+  #return(results)
+  cat("The GeneNetwork API is currently not allowing the querying of all phenotypes\n")
+  cat("As such this function isn't working as intended\n")
+  return(NULL)
 }
 
 # Convert downloaded BXD data to a matrix in R
