@@ -8,95 +8,89 @@
 # Routines to download and process BXD phenotype data using GNapi
 #
 
-# Download a single BXD phenotype
-download.single.BXD.phenotype <- function(datasetid, verbose = FALSE){
-  #info <- GNapi::info_dataset(datasetid)
-  #if("dataset" %in% names(info) && info$dataset == "phenotype"){
-  #  if(verbose) cat(paste0("Retrieved data for '", datasetid, "'\n"))
-  #  return(list(info, GNapi::get_pheno(datasetid)))
-  #}else{
-  #  if(verbose) cat(datasetid, "not a phenotype\n")
-  #}
-  cat("The GeneNetwork API is currently not allowing the querying of all phenotypes\n")
-  cat("As such this function isn't working as intended\n")
-  return(NULL)
-}
-
 # Download all BXD phenotypes and descriptions in a list (of lists)
 download.BXD.phenotypes <- function(verbose = FALSE){
-  #datasets <- GNapi::list_datasets("BXD")
-  #results <- vector("list", nrow(datasets))
-  #for(n in 1:nrow(datasets)){
-  #  results[[n]] <- tryCatch(
-  #    download.single.BXD.phenotype(datasets[n, "id"])
-  #    , error = function(e) {
-  #      if(verbose){
-  #        cat(paste0(n, " ", datasets[n, "id"], " - '", datasets[n, "name"], "' has some error\n"))
-  #      }
-  #    }
-  #  )
-  #}
-  #return(results)
-  cat("The GeneNetwork API is currently not allowing the querying of all phenotypes\n")
-  cat("As such this function isn't working as intended\n")
-  return(NULL)
+  tmp.annot <- tempfile()
+  tmp.data <- tempfile()
+  download.file("https://genenetwork.org/api/v_pre1/traits/BXDPublish.csv", tmp.annot)
+  download.file("https://genenetwork.org/api/v_pre1/sample_data/BXDPublish.csv", tmp.data)
+  annotation <- read.table(tmp.annot, sep = ",", header=TRUE)
+  phenotypes <- read.table(tmp.data, sep = ",", header=TRUE, na.strings=c("x"), row.names=1)
+  if(file.exists(tmp.annot)) file.remove(tmp.annot)
+  if(file.exists(tmp.data)) file.remove(tmp.data)
+
+  # Names should be GN_
+  annotation <- annotation[!duplicated(annotation),]
+  rownames(annotation) <- paste0("GN_", annotation[,"Id"])
+
+  # Names should be GN_
+  colnames(phenotypes) <- gsub("BXD_", "GN_", colnames(phenotypes))
+  
+  phenotypes <- phenotypes[, which(colnames(phenotypes) %in% rownames(annotation))]
+  annotation <- annotation[which(rownames(annotation) %in% colnames(phenotypes)),]
+  
+  phenotypes <- t(phenotypes[, rownames(annotation)])
+  
+  phenotype.descriptions <- annotation[,c("Id", "Description", "Year")]
+  colnames(phenotype.descriptions) <- c("name", "description", "year")
+  rownames(phenotype.descriptions) <- rownames(annotation)
+  
+  phenotype.descriptions[,"description"] <- gsub("Original post publication description: ", "", phenotype.descriptions[,"description"])
+  weird <- rownames(phenotype.descriptions)[grep("un-named trait", tolower(phenotype.descriptions[,"description"]))]
+  phenotype.descriptions <- phenotype.descriptions[-which(rownames(phenotype.descriptions) %in% weird),]
+  phenotypes <- phenotypes[-which(rownames(phenotypes) %in% weird),]
+  
+  attr(phenotypes, "annotation") <- phenotype.descriptions
+
+  return(phenotypes)
 }
 
 # Convert downloaded BXD data to a matrix in R
 as.phenotype.matrix <- function(bxd.genotypes, bxd.pheno){
-  hasData <- which(lapply(bxd.pheno, length) == 2)
-  gnIDs <- paste0("GN_", unlist(lapply(lapply(bxd.pheno[hasData],"[[", 1),"[", "id")))
-  samples <- colnames(bxd.genotypes)
-  phenotypes <- matrix(NA, length(hasData), length(samples), dimnames=list(gnIDs, samples))
-  phenotype.descriptions <- matrix(NA, length(hasData), 4, dimnames=list(gnIDs, c("name", "title", "description", "year")))
-  for(x in hasData) {
-    gnid <- paste0("GN_", bxd.pheno[[x]][[1]]$id)
-    gnname <- bxd.pheno[[x]][[1]]$name
-    gntitle <- bxd.pheno[[x]][[1]]$title
-    gndescr <- bxd.pheno[[x]][[1]]$descr
-    gnyear <- bxd.pheno[[x]][[1]]$year
-    if(is.null(gnname)) gnname <- "Unknown"
-    if(is.null(gntitle)) gntitle <- "Unknown"
-    if(is.null(gndescr)) gndescr <- "Unknown"
-    if(is.null(gnyear) || gnyear == "") gnyear <- "Unknown"
-    phenotype.descriptions[gnid, ] <- c(gnname, gntitle, gndescr, gnyear)
-    
-    trait.ind <- bxd.pheno[[x]][[2]][,"strain"]
-    trait.values <- bxd.pheno[[x]][[2]][,"value"]
-    names(trait.values) <- trait.ind
-    
-    trait.ind.with.geno <- trait.ind[which(trait.ind %in% colnames(phenotypes))]
-    trait.values.with.geno <- trait.values[trait.ind.with.geno]
-    
-    phenotypes[gnid, trait.ind.with.geno] <- trait.values.with.geno
-  }
-  attr(phenotypes, "annotation") <- phenotype.descriptions
-  return(phenotypes)
+  phenotype.descriptions <- attr(bxd.pheno, "annotation")
+  bxd.pheno <- bxd.pheno[, colnames(bxd.genotypes)]
+  attr(bxd.pheno, "annotation") <- phenotype.descriptions
+  return(bxd.pheno)
 }
 
 # Add a phenotype class (extracted from the description column) to each phenotype
 phenotype.add.class <- function(bxd.phenotypes, splitCNS = TRUE) {
   phenotype.descriptions <- attr(bxd.phenotypes, "annotation")
-  
+
   splitted <- strsplit(phenotype.descriptions[,"description"], "\\,|\\:|\\;")
   classes <- tolower(unlist(lapply(splitted,"[", 1)))
-  classes <- gsub(" systems", "", classes)                                # Make classes more consistent
-  classes <- gsub(" system", "", classes)                                 # Make classes more consistent
-  classes <- gsub(" systen", "", classes)                                 # Fix typos
-  classes <- gsub(" sytstem", "", classes)                                # Fix typos
-  classes <- gsub("enodocrine", "endocrine", classes)                     # Fix typos
-  classes <- gsub("endocrine", "endocrinology", classes)                  # Merge endocrine into endocrinology
-  classes <- gsub("reproductive", "reproduction", classes)                # Merge Reproductive into Reproduction
-  classes <- gsub(" biology", "", classes)                                # Cancer biology -> Cancer
-  classes <- gsub(" function", "", classes)                               # Make classes more consistent
-  classes <- gsub("muscloskeletal", "musculoskeletal", classes)           # Merge Muscloskeletal into Musculoskeletal
-  classes <- gsub(". metabolism", "", classes, fixed = TRUE)              # Fix a weird name
-  classes <- gsub("central nervous", "CNS", classes)                      # Rename: Central nervous to CNS
-  classes <- gsub("infection disease", "infectious disease", classes)     # Merge infection into infectious
-  classes <- gsub(" chemistry", "", classes)                              # Make classes more consistent (blood chemistry -> blood)
-  classes <- gsub("blood", "blood chemistry", classes)                    # Change blood back to blood chemistry
-  classes <- gsub("immune", "immune system", classes)                     # Change immune back to immune system
-  classes <- gsub("lung", "respiratory", classes)                         # Merge lung (2) into respiratory
+  classes <- gsub(" systems", "", classes, ignore.case = TRUE)                                          # Make classes more consistent
+  classes <- gsub(" system", "", classes, ignore.case = TRUE)                                           # Make classes more consistent
+  classes <- gsub(" systen", "", classes, ignore.case = TRUE)                                           # Fix typos
+  classes <- gsub(" sytstem", "", classes, ignore.case = TRUE)                                          # Fix typos
+  classes <- gsub("enodocrine", "endocrine", classes, ignore.case = TRUE)                               # Fix typos
+  classes <- gsub("endocrine", "endocrinology", classes, ignore.case = TRUE)                            # Merge endocrine into endocrinology
+  classes <- gsub("reproductive", "reproduction", classes, ignore.case = TRUE)                          # Merge Reproductive into Reproduction
+  classes <- gsub(" biology", "", classes, ignore.case = TRUE)                                          # Cancer biology -> Cancer
+  classes <- gsub(" function", "", classes, ignore.case = TRUE)                                         # Make classes more consistent
+  classes <- gsub("muscloskeletal", "musculoskeletal", classes, ignore.case = TRUE)                     # Merge Muscloskeletal into Musculoskeletal
+  classes <- gsub(". metabolism", "", classes, fixed = TRUE)                                            # Fix a weird name
+  classes <- gsub("central nervous", "CNS", classes, ignore.case = TRUE)                                # Rename: Central nervous to CNS
+  classes <- gsub("infection disease", "infectious disease", classes, ignore.case = TRUE)               # Merge infection into infectious
+  classes <- gsub(" chemistry", "", classes, ignore.case = TRUE)                                        # Make classes more consistent (blood chemistry -> blood)
+  classes <- gsub("blood", "blood chemistry", classes, ignore.case = TRUE)                              # Change blood back to blood chemistry
+  classes <- gsub("immune", "immune system", classes, ignore.case = TRUE)                               # Change immune back to immune system
+  classes <- gsub("lung", "respiratory", classes, ignore.case = TRUE)                                   # Merge lung (2) into respiratory
+  classes <- gsub("reproductive system", "reproduction", classes, ignore.case = TRUE)                   # Merge lung (2) into respiratory
+  classes <- gsub("cocaine response (10 mg/kg ip)", "cocaine response", classes, fixed=TRUE)    # Merge Cocaine responses
+  classes <- gsub("cocaine response (15 mg/kg ip)", "cocaine response", classes, fixed=TRUE)    # Merge Cocaine responses
+  classes <- gsub("cocaine response (40 mg/kg ip)", "cocaine response", classes, fixed=TRUE)    # Merge Cocaine responses
+  classes <- gsub("cocaine response (2 x 10 mg/kg ip)", "cocaine response", classes, fixed=TRUE)    # Merge Cocaine responses
+  classes <- gsub("cocaine response (2 x 10 mg/kg, ip)", "cocaine response", classes, fixed=TRUE)    # Merge Cocaine responses
+  classes <- gsub("cocaine response (3 x 3.2 mg/kg ip", "cocaine response", classes, fixed=TRUE)    # Merge Cocaine responses
+  classes <- gsub("ethanol response (2 g/kg ip)", "ethanol response", classes, fixed=TRUE)    # Merge Ethanol responses
+  classes <- gsub("ethanol response (2 g/kg)", "ethanol response", classes, fixed=TRUE)    # Merge Ethanol responses
+  classes <- gsub("ethanol response (2 mg/kg ip)", "ethanol response", classes, fixed=TRUE)    # Merge Ethanol responses
+  classes <- gsub("ethanol response (2.25 g/kg ip)", "ethanol response", classes, fixed=TRUE)    # Merge Ethanol responses
+  classes <- gsub("ethanol response (4.0 g/kg ip)", "ethanol response", classes, fixed=TRUE)    # Merge Ethanol responses
+  classes <- gsub("morphine response (50 mg/kg ip)", "morphine response", classes, fixed=TRUE)    # Merge Ethanol responses
+  classes <- gsub("saline control response (10 mg/kg ip)", "saline control", classes, fixed=TRUE)    # Merge Saline responses
+  classes <- gsub("saline control response (10 ml/kg ip)", "saline control", classes, fixed=TRUE)    # Merge Saline responses
 
   # Special handling of the CNS class since it is so big
   if(splitCNS) {

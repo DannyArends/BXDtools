@@ -33,10 +33,11 @@ do.BXD.phewas.all <- function(bxd.genotypes, bxd.phenosomes) {
   return(res)
 }
 
-plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = FALSE,
+plot.phewas <- function(scores, bxd.phenosomes, do.sort = FALSE, decreasing = FALSE,
                         main = "BxD PheWAS results", pch = 19, cex = 0.6, significance = 19, type = "h",
                         colorSeed = 1, colorRange = c("darkslateblue", "hotpink1", "forestgreen", "orange", "black", "firebrick1"), ...) {
   classes <- attr(bxd.phenosomes, "annotation")[,"class"]
+  names(classes) <- rownames(bxd.phenosomes)
   marker <- attr(scores, "marker")
   ylab <- "-log10(P)"
   if(attr(scores, "LRS")) ylab = "LRS"
@@ -53,6 +54,7 @@ plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = F
   }else{
     classes.inOrder <- classes
   }
+  #return(classes.inOrder)
   # Set the colorSeed to NA, to cycle colors to groups each plot
   if(!is.na(colorSeed)) set.seed(colorSeed)
   # Generate colors from colorRange and mix them up for beter visability
@@ -60,9 +62,9 @@ plot.phewas <- function(pvalues, bxd.phenosomes, do.sort = FALSE, decreasing = F
   names(mcolors) <- unique(classes)
 
   plot(scores, col = mcolors[classes.inOrder], pch = pch, 
-                        cex = cex, type = type, xaxt='n', xlab = "Phenosome", ylab = ylab, main=main, ...)
+               cex = cex, type = type, xaxt='n', xlab = "Phenosome", ylab = ylab, main=main)
   legend("topright", paste0(names(mcolors), " (N = ", table(classes)[names(mcolors)], ")"), 
-                     col = mcolors, pch = pch, cex = cex, ncol = 2)
+                     col = mcolors, pch = pch, cex = cex, ncol = 6)
   abline(h = significance, lty=2)
   results <- cbind(classes.inOrder, scores)
   significant <- results[which(as.numeric(results[,2]) > significance),]
